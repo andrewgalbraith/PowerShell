@@ -1,0 +1,5 @@
+This module is used to provide miscellaneous helpful functions and additional binaries. These functions are useful to other modules and scripts but are not worthy of grouping as a module of functionality.
+
+Some binaries are used by functions that are not available to the environment by default. When this module is imported to Powershell, these binaries are added to the path for the duration of the session.
+
+To see which functions are available, run the command "Get-Command -Module Utils"

@@ -1,0 +1,46 @@
+<#
+.SYNOPSIS
+  Upgrade user license to E3
+.DESCRIPTION
+  Upgrade a user's Exchange license to the E3 with only the Office365 and Plan 2 
+  options enabled. Any existing licenses will be removed, so this will work even
+  if the mailbox already had an E3 plan.
+#>
+
+# Get the username
+$username = Read-Host "Enter the username for license upgrade (e.g. js123456)"
+$upn = $username + "@contoso.com"
+
+# Connect to MS Online
+Connect-MSOL
+
+# Check the user exists
+try
+{
+    Get-MSOLUser -UserPrincipalName $upn -ErrorAction Stop | Out-Null
+}
+catch
+{
+    Write-Host "ERROR:" $_.Exception.Message -ForegroundColor Red
+    exit;
+}
+
+# Find out if Office deployment is required
+Write-Host ""
+Write-Warning ("Saying Yes to the next question will cause an email to be sent when your request is processed.`nPlease ensure the user doesn't already have Office365.")
+$answer = Read-Host "Do you want to deploy Office365 too? (Y/N)"
+
+$office_required = $false
+if($answer -eq "Y")
+{
+    $office_required = $true
+}
+
+# Create the workflow for processing
+(UpgradeLicenseToE3 "$upn").Initialise(@{
+        "UserPrincipalName" = $upn; 
+        "OfficeDeploymentRequired" = $office_required;
+        "Creator" = $env:USERNAME
+    }).Save() | Out-Null
+
+Write-Host "Please wait 30 minutes for your request to be processed."
